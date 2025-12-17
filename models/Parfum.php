@@ -13,8 +13,9 @@ class Parfum {
     public $diskon;
     public $stok;
     public $stok_minimum;
-    public $tanggal_expired;
+    // public $tanggal_expired;
     public $deskripsi;
+    public $foto_parfum;
 
     public function __construct($db) {
         $this->conn = $db;
@@ -22,13 +23,21 @@ class Parfum {
 
     public function create() {
         $query = "INSERT INTO " . $this->table_name . "
-                  SET kode_parfum=:kode_parfum, nama_parfum=:nama_parfum, kategori_id=:kategori_id, 
-                      satuan=:satuan, harga_beli=:harga_beli, harga_jual=:harga_jual, 
-                      diskon=:diskon, stok=:stok, stok_minimum=:stok_minimum, tanggal_expired=:tanggal_expired, 
-                      deskripsi=:deskripsi";
+          SET kode_parfum=:kode_parfum,
+              nama_parfum=:nama_parfum,
+              foto_parfum=:foto_parfum,
+              kategori_id=:kategori_id,
+              satuan=:satuan,
+              harga_beli=:harga_beli,
+              harga_jual=:harga_jual,
+              diskon=:diskon,
+              stok=:stok,
+              stok_minimum=:stok_minimum,
+              deskripsi=:deskripsi";
 
         $stmt = $this->conn->prepare($query);
 
+        // $this->id = htmlspecialchars(strip_tags($this->id));
         $this->kode_parfum = htmlspecialchars(strip_tags($this->kode_parfum));
         $this->nama_parfum = htmlspecialchars(strip_tags($this->nama_parfum));
         $this->kategori_id = htmlspecialchars(strip_tags($this->kategori_id));
@@ -38,9 +47,11 @@ class Parfum {
         $this->diskon = htmlspecialchars(strip_tags($this->diskon));
         $this->stok = htmlspecialchars(strip_tags($this->stok));
         $this->stok_minimum = htmlspecialchars(strip_tags($this->stok_minimum));
-        $this->tanggal_expired = htmlspecialchars(strip_tags($this->tanggal_expired));
+        // $this->tanggal_expired = htmlspecialchars(strip_tags($this->tanggal_expired));
         $this->deskripsi = htmlspecialchars(strip_tags($this->deskripsi));
+        $this->foto_parfum = htmlspecialchars(strip_tags($this->foto_parfum));
 
+        // $stmt->bindParam(':id', $this->id);
         $stmt->bindParam(':kode_parfum', $this->kode_parfum);
         $stmt->bindParam(':nama_parfum', $this->nama_parfum);
         $stmt->bindParam(':kategori_id', $this->kategori_id);
@@ -50,8 +61,9 @@ class Parfum {
         $stmt->bindParam(':diskon', $this->diskon);
         $stmt->bindParam(':stok', $this->stok);
         $stmt->bindParam(':stok_minimum', $this->stok_minimum);
-        $stmt->bindParam(':tanggal_expired', $this->tanggal_expired);
+        // $stmt->bindParam(':tanggal_expired', $this->tanggal_expired);
         $stmt->bindParam(':deskripsi', $this->deskripsi);
+        $stmt->bindParam(':foto_parfum', $this->foto_parfum);
 
         if ($stmt->execute()) {
             return true;
@@ -83,6 +95,7 @@ class Parfum {
 
         if ($stmt->rowCount() > 0) {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            // $this->id = $row['id'];
             $this->kode_parfum = $row['kode_parfum'];
             $this->nama_parfum = $row['nama_parfum'];
             $this->kategori_id = $row['kategori_id'];
@@ -92,8 +105,9 @@ class Parfum {
             $this->diskon = $row['diskon'];
             $this->stok = $row['stok'];
             $this->stok_minimum = $row['stok_minimum'];
-            $this->tanggal_expired = $row['tanggal_expired'];
+            // $this->tanggal_expired = $row['tanggal_expired'];
             $this->deskripsi = $row['deskripsi'];
+            $this->foto_parfum = $row['foto_parfum'];
             return true;
         }
         return false;
@@ -101,14 +115,22 @@ class Parfum {
 
     public function update() {
         $query = "UPDATE " . $this->table_name . "
-                  SET kode_parfum=:kode_parfum, nama_parfum=:nama_parfum, kategori_id=:kategori_id, 
-                      satuan=:satuan, harga_beli=:harga_beli, harga_jual=:harga_jual, 
-                      diskon=:diskon, stok=:stok, stok_minimum=:stok_minimum, tanggal_expired=:tanggal_expired, 
-                      deskripsi=:deskripsi
-                  WHERE id=:id";
+          SET kode_parfum=:kode_parfum,
+              nama_parfum=:nama_parfum,
+              foto_parfum=:foto_parfum,
+              kategori_id=:kategori_id,
+              satuan=:satuan,
+              harga_beli=:harga_beli,
+              harga_jual=:harga_jual,
+              diskon=:diskon,
+              stok=:stok,
+              stok_minimum=:stok_minimum,
+              deskripsi=:deskripsi
+          WHERE id=:id";
 
         $stmt = $this->conn->prepare($query);
 
+        // $this->id = htmlspecialchars(strip_tags($this->id));
         $this->kode_parfum = htmlspecialchars(strip_tags($this->kode_parfum));
         $this->nama_parfum = htmlspecialchars(strip_tags($this->nama_parfum));
         $this->kategori_id = htmlspecialchars(strip_tags($this->kategori_id));
@@ -118,10 +140,11 @@ class Parfum {
         $this->diskon = htmlspecialchars(strip_tags($this->diskon));
         $this->stok = htmlspecialchars(strip_tags($this->stok));
         $this->stok_minimum = htmlspecialchars(strip_tags($this->stok_minimum));
-        $this->tanggal_expired = htmlspecialchars(strip_tags($this->tanggal_expired));
+        // $this->tanggal_expired = htmlspecialchars(strip_tags($this->tanggal_expired));
         $this->deskripsi = htmlspecialchars(strip_tags($this->deskripsi));
         $this->id = htmlspecialchars(strip_tags($this->id));
 
+        // $stmt->bindParam(':id', $this->id);
         $stmt->bindParam(':kode_parfum', $this->kode_parfum);
         $stmt->bindParam(':nama_parfum', $this->nama_parfum);
         $stmt->bindParam(':kategori_id', $this->kategori_id);
@@ -131,9 +154,10 @@ class Parfum {
         $stmt->bindParam(':diskon', $this->diskon);
         $stmt->bindParam(':stok', $this->stok);
         $stmt->bindParam(':stok_minimum', $this->stok_minimum);
-        $stmt->bindParam(':tanggal_expired', $this->tanggal_expired);
+        // $stmt->bindParam(':tanggal_expired', $this->tanggal_expired);
         $stmt->bindParam(':deskripsi', $this->deskripsi);
         $stmt->bindParam(':id', $this->id);
+        $stmt->bindParam(':foto_parfum', $this->foto_parfum);
 
         if ($stmt->execute()) {
             return true;

@@ -68,7 +68,7 @@ if (isset($_GET['action'])) {
                     'harga_jual' => $parfum->harga_jual,
                     'diskon' => $parfum->diskon ?? 0,
                     'stok' => $parfum->stok,
-                    'gambar_parfum' => $parfum->gambar_parfum
+                    'foto_parfum' => $parfum->foto_parfum
                 ]);
             } else {
                 echo json_encode(['error' => 'parfum tidak ditemukan']);
@@ -377,7 +377,10 @@ $customer_stmt->execute();
                 productCard.className = 'product-card';
                 productCard.onclick = () => addToCart(product);
                 
-                const imageUrl = product.gambar_parfum ? `uploads/${product.gambar_parfum}` : 'assets/img/parfum-bottle.png';
+                const imageUrl = product.foto_parfum 
+                    ? product.foto_parfum 
+                    : 'assets/img/parfum-bottle.png';
+
                 
                 productCard.innerHTML = `
                 <div class="border-2 border-[#d4af37] rounded-sm flex cursor-pointer flex-col justify-center items-center duration-100 hover:scale-105">
@@ -422,7 +425,7 @@ $customer_stmt->execute();
                     diskon: parseFloat(product.diskon || 0),
                     quantity: 1,
                     max_stock: product.stok,
-                    gambar_parfum: product.gambar_parfum || null
+                    foto_parfum: product.foto_parfum || null
                 });
             }
             
@@ -446,7 +449,10 @@ $customer_stmt->execute();
 
             cart.forEach((item, index) => {
                 const subtotal = (item.price * item.quantity) - (item.diskon || 0);
-                const imageUrl = item.gambar_parfum ? `uploads/${item.gambar_parfum}` : 'assets/img/parfum-bottle.png';
+                const imageUrl = item.foto_parfum 
+                    ? item.foto_parfum 
+                    : 'assets/img/parfum-bottle.png';
+
 
                 cartHTML += `
                     <div class="cart-item">

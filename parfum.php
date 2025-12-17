@@ -19,7 +19,8 @@ if ($_POST) {
     if (isset($_POST['action'])) {
         switch ($_POST['action']) {
             case 'create':
-                $parfum->kode_parfum = sanitizeInput($_POST['kode_parfum']);
+                // $parfum->id = sanitizeInput($_POST['id']);    
+                // $parfum->kode_parfum = sanitizeInput($_POST['kode_parfum']);    
                 $parfum->nama_parfum = sanitizeInput($_POST['nama_parfum']);
                 $parfum->kategori_id = sanitizeInput($_POST['kategori_id']);
                 $parfum->satuan = sanitizeInput($_POST['satuan']);
@@ -28,8 +29,36 @@ if ($_POST) {
                 $parfum->diskon = sanitizeInput($_POST['diskon'] ?? 0);
                 $parfum->stok = sanitizeInput($_POST['stok']);
                 $parfum->stok_minimum = sanitizeInput($_POST['stok_minimum']);
-                $parfum->tanggal_expired = sanitizeInput($_POST['tanggal_expired']);
+                // $parfum->tanggal_expired = sanitizeInput($_POST['tanggal_expired']);
                 $parfum->deskripsi = sanitizeInput($_POST['deskripsi']);
+                
+                // === UPLOAD FOTO PARFUM ===
+                if (!empty($_FILES['foto_parfum']['name'])) {
+
+                    $allowed = ['jpg','jpeg','png','webp'];
+                    $fileName = $_FILES['foto_parfum']['name'];
+                    $tmpFile  = $_FILES['foto_parfum']['tmp_name'];
+                    $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+                    if (!in_array($ext, $allowed)) {
+                        $message = 'Format foto tidak valid!';
+                        $message_type = 'error';
+                        break;
+                    }
+
+                    if (!is_dir('uploads/parfum')) {
+                        mkdir('uploads/parfum', 0777, true);
+                    }
+
+                    $newName = uniqid('parfum_') . '.' . $ext;
+                    $path = 'uploads/parfum/' . $newName;
+
+                    move_uploaded_file($tmpFile, $path);
+                    $parfum->foto_parfum = $path;
+
+                } else {
+                    $parfum->foto_parfum = null;
+                }
 
                 if ($parfum->create()) {
                     $message = 'Data parfum berhasil ditambahkan!';
@@ -54,6 +83,30 @@ if ($_POST) {
                 $parfum->tanggal_expired = sanitizeInput($_POST['tanggal_expired']);
                 $parfum->deskripsi = sanitizeInput($_POST['deskripsi']);
 
+                if (!empty($_FILES['foto_parfum']['name'])) {
+                    $allowed = ['jpg','jpeg','png','webp'];
+                    $fileName = $_FILES['foto_parfum']['name'];
+                    $tmpFile  = $_FILES['foto_parfum']['tmp_name'];
+                    $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+                    if (in_array($ext, $allowed)) {
+
+                        if (!is_dir('uploads/parfum')) {
+                            mkdir('uploads/parfum', 0777, true);
+                        }
+
+                        $newName = uniqid('parfum_') . '.' . $ext;
+                        $path = 'uploads/parfum/' . $newName;
+
+                        move_uploaded_file($tmpFile, $path);
+                        $parfum->foto_parfum = $path;
+                    }
+
+                } else {
+                    // JANGAN overwrite foto lama
+                    $parfum->foto_parfum = $_POST['foto_lama'] ?? null;
+                }
+
                 if ($parfum->update()) {
                     $message = 'Data parfum berhasil diperbarui!';
                     $message_type = 'success';
@@ -65,6 +118,11 @@ if ($_POST) {
 
             case 'delete':
                 $parfum->id = sanitizeInput($_POST['id']);
+                $data = $parfum->readOne();
+                if ($data && $parfum->foto_parfum && file_exists($parfum->foto_parfum)) {
+                    unlink($parfum->foto_parfum);
+                }
+
                 if ($parfum->delete()) {
                     $message = 'Data parfum berhasil dihapus!';
                     $message_type = 'success';
@@ -213,13 +271,13 @@ $kategori_stmt = $kategori->readAll();
             <!-- Add Parfum Form -->
             <div class="bg-white border-2 border-[#d4af37] rounded-xl p-6 mb-8 shadow-[0_4px_15px_rgba(0,0,0,0.1)]">
                 <h2 class="text-2xl font-bold text-[#d4af37] mb-5 pb-3 border-b-2 border-[#d4af37]">Tambah Parfum Baru</h2>
-                <form method="POST" class="space-y-5">
+                <form method="POST" enctype="multipart/form-data" class="space-y-5">
                     <input type="hidden" name="action" value="create">
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
                             <label for="kode_parfum" class="block mb-2 font-semibold text-[#d4af37] text-sm">Kode parfum</label>
-                            <input type="text" id="kode_parfum" name="kode_parfum" required 
+                            <input type="text" id="kode_parfume" name="kode_parfum" required 
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-black focus:outline-none focus:border-[#d4af37] focus:shadow-[0_4px_12px_rgba(212,175,55,0.3)] transition-all">
                         </div>
                         <div>
@@ -242,7 +300,7 @@ $kategori_stmt = $kategori->readAll();
                         </div>
                         <div>
                             <label for="satuan" class="block mb-2 font-semibold text-[#d4af37] text-sm">Satuan</label>
-                            <input type="text" id="satuan" name="satuan" required placeholder="cth: tablet, botol, kapsul"
+                            <input type="text" id="satuan" name="satuan" required placeholder="cth: ml"
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-black focus:outline-none focus:border-[#d4af37] focus:shadow-[0_4px_12px_rgba(212,175,55,0.3)] transition-all">
                         </div>
                     </div>
@@ -267,32 +325,39 @@ $kategori_stmt = $kategori->readAll();
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-black focus:outline-none focus:border-[#d4af37] focus:shadow-[0_4px_12px_rgba(212,175,55,0.3)] transition-all">
                         </div>
                     </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div>
-                            <label for="stok" class="block mb-2 font-semibold text-[#d4af37] text-sm">Stok</label>
-                            <input type="number" id="stok" name="stok" required min="0"
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-black focus:outline-none focus:border-[#d4af37] focus:shadow-[0_4px_12px_rgba(212,175,55,0.3)] transition-all">
-                        </div>
-                        <div>
-                            <label for="stok_minimum" class="block mb-2 font-semibold text-[#d4af37] text-sm">Stok Minimum</label>
-                            <input type="number" id="stok_minimum" name="stok_minimum" required min="0"
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-black focus:outline-none focus:border-[#d4af37] focus:shadow-[0_4px_12px_rgba(212,175,55,0.3)] transition-all">
-                        </div>
+                    <div>
+                        <label for="stok" class="block mb-2 font-semibold text-[#d4af37] text-sm">Stok</label>
+                        <input type="number" id="stok" name="stok" required min="0"
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-black focus:outline-none focus:border-[#d4af37] focus:shadow-[0_4px_12px_rgba(212,175,55,0.3)] transition-all">
+                    </div>
+                    <div>
+                        <label for="stok_minimum" class="block mb-2 font-semibold text-[#d4af37] text-sm">Stok Minimum</label>
+                        <input type="number" id="stok_minimum" name="stok_minimum" required min="0"
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-black focus:outline-none focus:border-[#d4af37] focus:shadow-[0_4px_12px_rgba(212,175,55,0.3)] transition-all">
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    </div>
+
+                    <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
                             <label for="tanggal_expired" class="block mb-2 font-semibold text-[#d4af37] text-sm">Tanggal Expired</label>
                             <input type="date" id="tanggal_expired" name="tanggal_expired"
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-black focus:outline-none focus:border-[#d4af37] focus:shadow-[0_4px_12px_rgba(212,175,55,0.3)] transition-all">
                         </div>
-                    </div>
+                    </div> -->
 
                     <div>
                         <label for="deskripsi" class="block mb-2 font-semibold text-[#d4af37] text-sm">Deskripsi</label>
                         <textarea id="deskripsi" name="deskripsi" rows="3"
                             class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-black focus:outline-none focus:border-[#d4af37] focus:shadow-[0_4px_12px_rgba(212,175,55,0.3)] transition-all"></textarea>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-[#d4af37] text-sm">
+                            Foto Parfum
+                        </label>
+                        <input type="file" name="foto_parfum" accept="image/*"
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black">
                     </div>
 
                     <button type="submit" 
@@ -311,23 +376,24 @@ $kategori_stmt = $kategori->readAll();
                     <table class="w-full">
                         <thead>
                             <tr class="bg-[#d4af37]/10">
-                                <th class="px-4 py-4 text-left text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Kode</th>
-                                <th class="px-4 py-4 text-left text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Nama Parfum</th>
-                                <th class="px-4 py-4 text-left text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Kategori</th>
-                                <th class="px-4 py-4 text-left text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Satuan</th>
-                                <th class="px-4 py-4 text-left text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Harga Beli</th>
-                                <th class="px-4 py-4 text-left text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Harga Jual</th>
-                                <th class="px-4 py-4 text-left text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Diskon</th>
-                                <th class="px-4 py-4 text-left text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Stok</th>
-                                <th class="px-4 py-4 text-left text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Stok Min</th>
-                                <th class="px-4 py-4 text-left text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Expired</th>
-                                <th class="px-4 py-4 text-left text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Aksi</th>
+                                <th class="px-4 py-4 text-center text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Kode</th>
+                                <th class="px-4 py-4 text-center text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Nama Parfum</th>
+                                <th class="px-4 py-4 text-center text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Kategori</th>
+                                <th class="px-4 py-4 text-center text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Satuan</th>
+                                <th class="px-4 py-4 text-center text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Harga Beli</th>
+                                <th class="px-4 py-4 text-center text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Harga Jual</th>
+                                <th class="px-4 py-4 text-center text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Diskon</th>
+                                <th class="px-4 py-4 text-center text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Stok</th>
+                                <th class="px-4 py-4 text-center text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Stok Min</th>
+                                <!-- <th class="px-4 py-4 text-center text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Expired</th> -->
+                                <th class="px-4 py-4 text-center text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Foto</th>
+                                <th class="px-4 py-4 text-center text-[#d4af37] font-semibold border-b-2 border-[#d4af37]">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php while ($row = $stmt->fetch(PDO::FETCH_ASSOC)): ?>
                             <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                                <td class="px-4 py-4 text-black font-medium"><?php echo $row['kode_parfum']; ?></td>
+                                <td class="px-4 py-4 text-black font-medium"><?php echo $row['id']; ?></td>
                                 <td class="px-4 py-4 text-black font-medium"><?php echo $row['nama_parfum']; ?></td>
                                 <td class="px-4 py-4 text-black"><?php echo $row['nama_kategori']; ?></td>
                                 <td class="px-4 py-4 text-black"><?php echo $row['satuan']; ?></td>
@@ -340,29 +406,20 @@ $kategori_stmt = $kategori->readAll();
                                     </span>
                                 </td>
                                 <td class="px-4 py-4 text-black"><?php echo $row['stok_minimum']; ?></td>
-                                <td class="px-4 py-4 text-black">
-                                    <?php 
-                                    if ($row['tanggal_expired']) {
-                                        $expired = strtotime($row['tanggal_expired']);
-                                        $now = time();
-                                        $days_left = ($expired - $now) / (60 * 60 * 24);
-                                        
-                                        if ($days_left < 0) {
-                                            echo '<span class="px-3 py-1 rounded-md text-xs font-semibold bg-red-100 text-red-700">Expired</span>';
-                                        } elseif ($days_left <= 30) {
-                                            echo '<span class="px-3 py-1 rounded-md text-xs font-semibold bg-yellow-100 text-yellow-800">' . date('d/m/Y', $expired) . '</span>';
-                                        } else {
-                                            echo date('d/m/Y', $expired);
-                                        }
-                                    } else {
-                                        echo '-';
-                                    }
-                                    ?>
+                            
+                                <td>
+                                    <?php if ($row['foto_parfum']): ?>
+                                        <img src="<?php echo $row['foto_parfum']; ?>" 
+                                            class="w-20 h-20 object-cover rounded-lg border border-[#d4af37]">
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
                                 </td>
+
                                 <td class="px-4 py-4">
                                     <div class="flex gap-2">
                                         <button onclick="editparfum(<?php echo htmlspecialchars(json_encode($row)); ?>)" 
-                                            class="px-4 py-2 bg-gradient-to-r from-[#d4af37] to-[#d4af37]-light text-black font-semibold rounded-lg transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_8px_rgba(212,175,55,0.3)]">
+                                            class="px-4 py-2 bg-[#d4af37] text-black font-semibold rounded-lg transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_8px_rgba(212,175,55,0.3)]">
                                             Edit
                                         </button>
                                         <button onclick="deleteparfum(<?php echo $row['id']; ?>)" 
@@ -384,9 +441,10 @@ $kategori_stmt = $kategori->readAll();
     <div id="editModal" class="hidden fixed inset-0 bg-black/70 z-50">
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl border-2 border-[#d4af37] w-[90%] max-w-2xl max-h-[90vh] overflow-y-auto shadow-[0_8px_30px_rgba(212,175,55,0.3)] p-8">
             <h2 class="text-2xl font-bold text-[#d4af37] mb-5 pb-3 border-b-2 border-[#d4af37]">Edit Parfum</h2>
-            <form method="POST" id="editForm" class="space-y-5">
+            <form method="POST" enctype="multipart/form-data" id="editForm" class="space-y-5">
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="id" id="edit_id">
+                <input type="hidden" name="foto_lama" id="foto_lama">
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
@@ -468,6 +526,13 @@ $kategori_stmt = $kategori->readAll();
                     <textarea id="edit_deskripsi" name="deskripsi" rows="3"
                         class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-black focus:outline-none focus:border-[#d4af37] focus:shadow-[0_4px_12px_rgba(212,175,55,0.3)] transition-all"></textarea>
                 </div>
+                <div>
+                    <label class="block mb-2 font-semibold text-[#d4af37] text-sm">
+                        Foto Parfum (Opsional)
+                    </label>
+                    <input type="file" name="foto_parfum" accept="image/*"
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black">
+                </div>
 
                 <div class="flex gap-3 mt-6">
                     <button type="submit" 
@@ -497,6 +562,7 @@ $kategori_stmt = $kategori->readAll();
             document.getElementById('edit_stok_minimum').value = data.stok_minimum;
             document.getElementById('edit_tanggal_expired').value = data.tanggal_expired;
             document.getElementById('edit_deskripsi').value = data.deskripsi;
+            document.getElementById('foto_lama').value = data.foto_parfum;
             document.getElementById('editModal').style.display = 'block';
         }
 

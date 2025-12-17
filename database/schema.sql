@@ -34,7 +34,7 @@ CREATE TABLE kategori_parfum (
 
 -- Tabel parfum
 CREATE TABLE parfum (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY AUTO_INCREMENT,
     kode_parfum VARCHAR(20) UNIQUE NOT NULL,
     nama_parfum VARCHAR(200) NOT NULL,
     kategori_id INT,
@@ -46,6 +46,7 @@ CREATE TABLE parfum (
     stok_minimum INT DEFAULT 0,
     tanggal_expired DATE,
     deskripsi TEXT,
+    foto_parfum varchar(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (kategori_id) REFERENCES kategori_parfum(id) ON DELETE SET NULL

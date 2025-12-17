@@ -1,3 +1,27 @@
+<?php
+require_once 'config/config.php';
+
+$database = new Database();
+$db = $database->getConnection();
+
+// Ambil 3 produk (misalnya best seller)
+$query = "
+    SELECT 
+        nama_parfum,
+        kategori_id,
+        satuan,
+        deskripsi,
+        harga_jual,
+        foto_parfum
+    FROM parfum
+";
+
+$stmt = $db->prepare($query);
+$stmt->execute();
+$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
+
 <!DOCTYPE html>
 <html lang="id">
   <head>
@@ -71,9 +95,7 @@
     </nav>
 
     <!-- Hero Section -->
-    <section
-      class="relative bg-[#0f0f0f] text-white pt-24 pb-20 px-4 overflow-hidden"
-    >
+    <section class="relative bg-[#0f0f0f] text-white py-30 overflow-hidden">
       <div class="absolute inset-0 opacity-10">
         <div
           class="absolute top-20 right-20 w-96 h-96 bg-[#d4af37] rounded-full blur-3xl"
@@ -121,7 +143,10 @@
             </div>
           </div>
 
-          <canvas id="canvas3d" class="w-[500px] h-[500px]"></canvas>
+          <!-- <canvas id="canvas3d" class="w-[500px] h-[500px]"></canvas> -->
+          <div>
+            <img src="./assets/img/nomerk-perfume.png" alt="" class="w-96" />
+          </div>
         </div>
       </div>
     </section>
@@ -144,53 +169,58 @@
         </div>
 
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          <!-- Card 1 -->
-          <div
-            class="group bg-white border border-[#d4af37]/30 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
-          >
-            <div
-              class="relative h-80 bg-gradient-to-br from-gray-100 to-gray-50 overflow-hidden"
-            >
-              <div class="absolute inset-0 flex items-center justify-center">
-                <div
-                  class="w-24 h-40 bg-gradient-to-b from-[#d4af37]/40 to-[#d4af37]/20 rounded-sm shadow-xl group-hover:scale-110 transition-transform duration-500"
-                ></div>
-              </div>
-              <div
-                class="absolute top-4 right-4 bg-[#d4af37] text-[#0f0f0f] px-3 py-1 text-xs font-montserrat font-bold"
-              >
-                BEST SELLER
-              </div>
-            </div>
-            <div class="p-6 space-y-3">
-              <h3
-                class="text-2xl font-lejourserif font-semibold text-[#0f0f0f]"
-              >
-                Noir Mystique
-              </h3>
-              <p class="text-gray-600 text-sm font-montserrat">
-                Oriental Woody - 100ml
-              </p>
-              <p class="text-gray-500 text-sm line-clamp-2 font-montserrat">
-                A captivating blend of oud, amber, and vanilla notes
-              </p>
-              <div class="flex justify-between items-center pt-4">
-                <span class="text-2xl font-montserrat font-bold text-[#d4af37]"
-                  >$325</span
-                >
-                <button
-                  class="bg-[#0f0f0f] text-white px-6 py-2 font-montserrat text-sm hover:bg-[#d4af37] hover:text-[#0f0f0f] transition-colors duration-300"
-                >
-                  ADD TO CART
-                </button>
-              </div>
-            </div>
-          </div>
 
-          <!-- Card 2 -->
+<?php foreach ($products as $product): ?>
+  <div
+    class="group bg-white border border-[#d4af37]/30 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+  >
+    <div
+      class="relative h-80 bg-gradient-to-br flex justify-center items-center from-gray-100 to-gray-50 overflow-hidden"
+    >
+      <?php if ($row['foto_parfum']): ?>
+                                        <img src="<?php echo $row['foto_parfum']; ?>" 
+                                            class="w-20 h-20 object-cover rounded-lg border border-[#d4af37]">
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
 
-          <!-- Card 3 -->
-        </div>
+      <div
+        class="absolute top-4 right-4 bg-[#d4af37] text-[#0f0f0f] px-3 py-1 text-xs font-montserrat font-bold"
+      >
+        BEST SELLER
+      </div>
+    </div>
+
+    <div class="p-6 space-y-3">
+      <h3 class="text-2xl font-lejourserif font-semibold text-[#0f0f0f]">
+        <?= htmlspecialchars($product['nama_parfum']) ?>
+      </h3>
+
+      <p class="text-gray-600 text-sm font-montserrat">
+        <?= htmlspecialchars($product['kategori_id']) ?> - <?= htmlspecialchars($product['satuan']) ?>ml
+      </p>
+
+      <p class="text-gray-500 text-sm line-clamp-2 font-montserrat">
+        <?= htmlspecialchars($product['deskripsi']) ?>
+      </p>
+
+      <div class="flex justify-between items-center pt-4">
+        <span class="text-2xl font-montserrat font-bold text-[#d4af37]">
+          Rp <?= number_format($product['harga_jual'], 0, ',', '.') ?>
+        </span>
+
+        <button
+          class="bg-[#0f0f0f] text-white px-6 py-2 font-montserrat text-sm hover:bg-[#d4af37] hover:text-[#0f0f0f] transition-colors duration-300"
+        >
+          ADD TO CART
+        </button>
+      </div>
+    </div>
+  </div>
+<?php endforeach; ?>
+
+</div>
+
       </div>
     </section>
 

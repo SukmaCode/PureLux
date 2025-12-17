@@ -43,7 +43,7 @@ if ($_POST) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - <?php echo APP_NAME; ?></title>
-    <link rel="stylesheet" href="./src/output.css">
+    <link rel="stylesheet" href="./src/output.css" />
     <style>
         body {
             background-color: #000000;
@@ -107,11 +107,9 @@ if ($_POST) {
 
     <div class="login-container fade-in">
         <!-- Header -->
-        <div style="padding: 2rem 2rem 1.5rem; text-align: center; border-bottom: 2px solid #d4af37;">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1rem;">
-                <!-- <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #d4af37 0%, #c9a961 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);">
-                    <span style="color: #000000; font-weight: bold; font-size: 1.5rem;">P</span>
-                </div> -->
+        <div style="padding: 1rem 2rem 1.5rem; text-align: center; border-bottom: 2px solid #d4af37;">
+            <div class="bg-red-9 w-full flex justify-end">
+                <a href="homepage2.html" class="text-3xl">X</a>
             </div>
             <h1 style="font-size: 1.875rem; font-weight: bold; color: #000000; margin-bottom: 0.5rem;">
                 <?php echo APP_NAME; ?>
