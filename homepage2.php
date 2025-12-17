@@ -177,12 +177,15 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div
       class="relative h-80 bg-gradient-to-br flex justify-center items-center from-gray-100 to-gray-50 overflow-hidden"
     >
-      <?php if ($row['foto_parfum']): ?>
-                                        <img src="<?php echo $row['foto_parfum']; ?>" 
-                                            class="w-20 h-20 object-cover rounded-lg border border-[#d4af37]">
-                                    <?php else: ?>
-                                        -
-                                    <?php endif; ?>
+      <?php if (!empty($product['foto_parfum'])): ?>
+        <img
+          src="<?= htmlspecialchars($product['foto_parfum']) ?>"
+          alt="<?= htmlspecialchars($product['nama_parfum'] ?? 'Parfum') ?>"
+          class="w-full h-full object-contain p-10"
+        >
+      <?php else: ?>
+        <div class="text-gray-400 font-montserrat text-sm">No image</div>
+      <?php endif; ?>
 
       <div
         class="absolute top-4 right-4 bg-[#d4af37] text-[#0f0f0f] px-3 py-1 text-xs font-montserrat font-bold"

@@ -109,7 +109,7 @@ if ($_POST) {
         <!-- Header -->
         <div style="padding: 1rem 2rem 1.5rem; text-align: center; border-bottom: 2px solid #d4af37;">
             <div class="bg-red-9 w-full flex justify-end">
-                <a href="homepage2.html" class="text-3xl">X</a>
+                <a href="homepage2.php" class="text-3xl">X</a>
             </div>
             <h1 style="font-size: 1.875rem; font-weight: bold; color: #000000; margin-bottom: 0.5rem;">
                 <?php echo APP_NAME; ?>

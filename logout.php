@@ -5,6 +5,6 @@ require_once 'config/config.php';
 session_destroy();
 
 // Redirect ke halaman login
-header('Location: homepage2.html');
+header('Location: homepage2.php');
 exit();
 ?>
